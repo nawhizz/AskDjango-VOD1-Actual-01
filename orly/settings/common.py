@@ -27,7 +27,7 @@ SECRET_KEY = 'o_(rkftuw+ptwl#b@hucff8k&l#li$&7&vb59mh(s+vv-9amo9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bootstrap4',
     'cover',
 ]
 
@@ -122,3 +123,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [    # FileSystem Static Finder에 의해서 사용되는 설정
+    ROOT('orly', 'static'),
+]

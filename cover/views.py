@@ -1,8 +1,9 @@
 from django.conf import settings
-from django.shortcuts import redirect, render
 from django.http import HttpResponse
+from django.shortcuts import redirect, render
 from PIL import Image, ImageFont, ImageDraw
 from .forms import CoverForm
+from .utils import COLOR_CODES
 
 
 def index(request):
@@ -21,27 +22,42 @@ def image_generator(request):
     title = request.GET['title']
     top_text = request.GET['top_text']
     author = request.GET['author']
-
     animal_code = request.GET['animal_code']
-    color_code = request.GET['color_code']
+    color_index = request.GET['color_code']
     guide_text = request.GET['guide_text']
     guide_text_placement = request.GET['guide_text_placement']
 
-    im = Image.new('RGB', (256, 256), 'white')
+    animal_path = settings.ROOT('assets', 'animal', '{}.png'.format(animal_code))
+    animal_im = Image.open(animal_path)
+
+    color = COLOR_CODES[int(color_index)]
+
+    canvas_im = Image.new('RGB', (500, 700), (255, 255, 255, 255))
+    
+    animal_im = animal_im.resize((400, 400))
+    canvas_im.paste(animal_im, (50, 40))  # left/top 지정
 
     # im : # 위 데이터를 받아서, 이미지는 여기에서 그리겠습니다~ ;)
     ttf_path = settings.ROOT('assets', 'fonts', 'NanumGothicCoding.ttf')
-    d = ImageDraw.Draw(im)
+    draw = ImageDraw.Draw(canvas_im)
 
-    fnt = ImageFont.truetype(ttf_path, 40)
-    d.text((10, 10), title, font=fnt, fill=(0, 255, 0, 128))
+    draw.rectangle((20, 0, 480, 10), fill=color)
+
+    draw.rectangle((10, 400, 480, 510), fill=color)
+
+    fnt = ImageFont.truetype(ttf_path, 70)
+    draw.text((45, 430), title, font=fnt, fill=(255, 255, 255, 255))
 
     fnt = ImageFont.truetype(ttf_path, 20)
-    d.text((10, 60), top_text, font=fnt, fill=(0, 255, 0, 255))
+    draw.text((160, 15), top_text, font=fnt, fill=(0, 0, 0, 255))
 
-    fnt = ImageFont.truetype(ttf_path, 10)
-    d.text((10, 100), author, font=fnt, fill=(0, 255, 0, 255))
+    fnt = ImageFont.truetype(ttf_path, 25)
+    draw.text((360, 655), author, font=fnt, fill=(0, 0, 0, 255))
+
+    fnt = ImageFont.truetype(ttf_path, 30)
+    position = (125, 505)  # bottom-right
+    draw.text(position, guide_text, font=fnt, fill=(0, 0, 0, 255))
 
     reponse = HttpResponse(content_type='image/png')    # file-like
-    im.save(reponse, format='PNG')
+    canvas_im.save(reponse, format='PNG')
     return reponse
